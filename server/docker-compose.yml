@@ -1,27 +1,27 @@
 services:
-  auth:
-    container_name: auth
-    build:
-      context: ./
-      dockerfile: Dockerfile.auth
-    restart: always
-    depends_on:
-      postgresql:
-        condition: service_started
-      redis:
-        condition: service_started
-      scylladb:
-        condition: service_started
-    # healthcheck:
-    #   test: ["executable", "arg"]
-    #   interval: 1m30s
-    #   timeout: 30s
-    #   retries: 5
-    #   start_period: 30s
-    ports:
-      - "8001:8001"
-    networks:
-      - web
+  # auth:
+  #   container_name: auth
+  #   build:
+  #     context: ./
+  #     dockerfile: Dockerfile.auth
+  #   restart: always
+  #   depends_on:
+  #     postgresql:
+  #       condition: service_started
+  #     # redis:
+  #     #   condition: service_started
+  #     # scylladb:
+  #     #   condition: service_started
+  #   # healthcheck:
+  #   #   test: ["executable", "arg"]
+  #   #   interval: 1m30s
+  #   #   timeout: 30s
+  #   #   retries: 5
+  #   #   start_period: 30s
+  #   ports:
+  #     - "8001:8001"
+  #   networks:
+  #     - web
 
   postgresql:
     container_name: postgresql
@@ -29,7 +29,7 @@ services:
     env_file: 
       - ./databases/postgresql/db.env
     volumes:
-      - ./databases/postgresql/init:/docker-entrypoint-initdb.d
+      - ./databases/postgresql/init/:/docker-entrypoint-initdb.d
       - ./databases/postgresql/data:/var/lib/postgresql/data
     restart: always
     # healthcheck:
@@ -56,21 +56,21 @@ services:
     ports:
       - 6379:6379
 
-  scylladb:
-    container_name: scylladb
-    image: scylladb/scylla:latest
-    command: --seeds=scylladb --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
-    volumes:
-      - ./databases/scylladb/init/init.txt:/init.txt
-      - ./databases/scylladb/data:/var/lib/scylla
-    restart: always
-    healthcheck:
-      test: ["CMD", "nodetool", "status"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
-    networks:
-      - web
+  # scylladb:
+  #   container_name: scylladb
+  #   image: scylladb/scylla:latest
+  #   command: --seeds=scylladb --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+  #   volumes:
+  #     - ./databases/scylladb/init/init.txt:/init.txt
+  #     - ./databases/scylladb/data:/var/lib/scylla
+  #   restart: always
+  #   healthcheck:
+  #     test: ["CMD", "nodetool", "status"]
+  #     interval: 10s
+  #     timeout: 10s
+  #     retries: 5
+  #   networks:
+  #     - web
 
 networks:
   web:

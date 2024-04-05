@@ -44,10 +44,10 @@ server-local-all: server-local-conan-reinstall server-local-rebuild
 server-local-rebuild:
 	@(cd server/build && \
 	source conanbuild.sh && \
-	cmake -DCMAKE_BUILD_TYPE=Release .. && \
+	cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS=" " .. && \
 	cmake --build . && \
 	source deactivate_conanbuild.sh && \
-	./auth 0.0.0.0 8001 . 1)
+	./auth 0.0.0.0 8001 1)
 
 .PHONY: server-local-conan-reinstall
 server-local-conan-reinstall:
@@ -55,6 +55,26 @@ server-local-conan-reinstall:
 	mkdir server/build && \
 	cd server/build && \
 	conan install .. --profile=cxxprofile --output-folder=. --build=missing)
+
+.PHONY: server-delete-all-databases-data
+server-delete-all-databases-data: server-delete-postgresql-data server-delete-redis-data
+
+.PHONY: server-delete-postgresql-data
+server-delete-postgresql-data:
+	@(rm -rf server/databases/postgresql/data && \
+	mkdir server/databases/postgresql/data)
+
+.PHONY: server-delete-redis-data
+server-delete-redis-data:
+	@(rm -rf server/databases/redis/data && \
+	mkdir server/databases/redis/data)
+
+.PHONY: postgresql-cli
+postgresql-cli:
+	docker exec -it postgresql psql -U admin123 -d chat
+
+
+
 
 # .PHONY: db-cqlsh
 # db-cqlsh:

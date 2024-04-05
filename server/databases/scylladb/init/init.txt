@@ -1,17 +1,20 @@
-CREATE KEYSPACE keyspace_comments WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 3};
+CREATE KEYSPACE keyspace_chat WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 3};
 
-USE keyspace_comments;
+USE keyspace_chat;
 
-CREATE TABLE IF NOT EXISTS comments (
-    entity text,
-    comment_id uuid,
-    author text,
-    text text,
-    deleted boolean,
-    created_by bigint,
-    created_time bigint,
-    updated_time bigint,
-    PRIMARY KEY ((entity), created_time, comment_id)
-) WITH CLUSTERING ORDER BY (created_time DESC);
+CREATE TABLE IF NOT EXISTS user_chats (
+    user_id bigint NOT NULL,
+    chat_id uuid NOT NULL,
+    time_updated timestamp NOT NULL,
+    PRIMARY KEY (user_id)
+) WITH CLUSTERING ORDER BY (time_updated DESC);
 
-CREATE INDEX ON comments (deleted);
+
+CREATE TABLE IF NOT EXISTS chats (
+    chat_id uuid NOT NULL,
+    from_user_id bigint NOT NULL,
+    message text NOT NULL,
+    edited boolean NOT NULL,
+    time timestamp NOT NULL,
+    PRIMARY KEY (chat_id)
+) WITH CLUSTERING ORDER BY (time DESC);

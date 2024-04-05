@@ -1,21 +1,20 @@
-FROM ubuntu:24.04 AS build
+FROM ubuntu:22.04 AS build
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Moscow
 ENV PATH="/root/.local/bin:$PATH"
-
-COPY . /app
-WORKDIR /app/build
 
 SHELL ["/bin/bash", "-c"]
 
 RUN apt-get update && \
     apt-get install -y \
     pipx  \
-    build-essential \
-    libboost-all-dev && \
+    build-essential && \
     pipx install cmake && \
     pipx install conan
+
+COPY . /app
+WORKDIR /app/build
 
 RUN conan profile detect && \
     mv /app/cxxprofile ~/.conan2/profiles/cxxprofile && \
@@ -25,7 +24,7 @@ RUN conan profile detect && \
     cmake --build . && \
     source deactivate_conanbuild.sh
 
-FROM ubuntu:24.04
+FROM ubuntu:22.04
 
 RUN groupadd dev && useradd -g dev dev
 USER dev
