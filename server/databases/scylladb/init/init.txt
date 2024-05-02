@@ -1,20 +1,20 @@
-CREATE KEYSPACE keyspace_chat WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 3};
+CREATE KEYSPACE IF NOT EXISTS keyspace_chat WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor' : 3};
 
 USE keyspace_chat;
 
 CREATE TABLE IF NOT EXISTS user_chats (
-    user_id bigint NOT NULL,
-    chat_id uuid NOT NULL,
-    time_updated timestamp NOT NULL,
-    PRIMARY KEY (user_id)
+    user_id bigint,
+    chat_id uuid,
+    time_updated bigint,
+    PRIMARY KEY ((user_id), time_updated)
 ) WITH CLUSTERING ORDER BY (time_updated DESC);
 
 
 CREATE TABLE IF NOT EXISTS chats (
-    chat_id uuid NOT NULL,
-    from_user_id bigint NOT NULL,
-    message text NOT NULL,
-    edited boolean NOT NULL,
-    time timestamp NOT NULL,
-    PRIMARY KEY (chat_id)
-) WITH CLUSTERING ORDER BY (time DESC);
+    chat_id uuid,
+    from_user_id bigint,
+    message text,
+    edited boolean,
+    time_updated bigint,
+    PRIMARY KEY ((chat_id), time_updated)
+) WITH CLUSTERING ORDER BY (time_updated DESC);

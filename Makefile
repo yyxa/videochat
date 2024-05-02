@@ -1,41 +1,46 @@
 SHELL := /bin/bash
 
 .PHONY: server-all
-server-all: server-rebuild server-start
+server-all: server-rebuild server-start scylladb-init
 
 .PHONY: server-build
 server-build:
-	cd server && \
-	docker compose build
+	@(cd server && \
+	docker compose build)
 
 .PHONY: server-rebuild
 server-rebuild:
-	cd server && \
-	docker compose build --force-rm
+	@(cd server && \
+	docker compose build --force-rm)
 
 .PHONY: server-start
 server-start:
-	cd server && \
-	docker compose up -d
+	@(cd server && \
+	docker compose up -d)
 
 .PHONY: server-stop
 server-stop:
-	cd server && \
-	docker compose stop
+	@(cd server && \
+	docker compose stop)
 
 .PHONY: server-restart
 server-restart: server-stop server-start
 
 .PHONY: server-logs
 server-logs:
-	cd server && \
-	docker compose logs -f --tail 100
+	@(cd server && \
+	docker compose logs -f --tail 100)
 
 .PHONY: server-clear
 server-clear:
 	@(cd server && \
 	docker compose kill  && \
 	docker compose rm -f) 
+
+.PHONY: scylladb-init
+scylladb-init:
+	@(sleep 30 && \
+	docker exec scylladb cqlsh -f /init.txt)
 
 .PHONY: server-local-all
 server-local-all: server-local-conan-reinstall server-local-rebuild
@@ -57,7 +62,7 @@ server-local-conan-reinstall:
 	conan install .. --profile=cxxprofile --output-folder=. --build=missing)
 
 .PHONY: server-delete-all-databases-data
-server-delete-all-databases-data: server-delete-postgresql-data server-delete-redis-data
+server-delete-all-databases-data: server-delete-postgresql-data server-delete-redis-data server-delete-scylladb-data
 
 .PHONY: server-delete-postgresql-data
 server-delete-postgresql-data:
@@ -69,17 +74,19 @@ server-delete-redis-data:
 	@(rm -rf server/databases/redis/data && \
 	mkdir server/databases/redis/data)
 
+.PHONY: server-delete-scylladb-data
+server-delete-scylladb-data:
+	@(rm -rf server/databases/scylladb/data && \
+	mkdir server/databases/scylladb/data)
+
 .PHONY: postgresql-cli
 postgresql-cli:
-	docker exec -it postgresql psql -U admin123 -d chat
+	@(docker exec -it postgresql psql -U admin123 -d chat)
 
+.PHONY: redis-cli
+redis-cli:
+	@(docker exec -it redis redis-cli)
 
-
-
-# .PHONY: db-cqlsh
-# db-cqlsh:
-# 	@(docker exec -it scylla-node1 cqlsh)
-
-# .PHONY: db-init
-# db-init:
-# 	@(docker exec scylla-node1 cqlsh -f /scylla-init.txt)
+.PHONY: scylladb-cli
+scylladb-cli:
+	@(docker exec -it scylladb cqlsh)

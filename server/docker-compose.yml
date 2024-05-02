@@ -27,17 +27,16 @@ services:
     container_name: postgresql
     image: postgres:latest
     env_file: 
-      - ./databases/postgresql/db.env
+      - ./.env
     volumes:
       - ./databases/postgresql/init/:/docker-entrypoint-initdb.d
       - ./databases/postgresql/data:/var/lib/postgresql/data
     restart: always
-    # healthcheck:
-    #   test: ["executable", "arg"]
-    #   interval: 1m30s
-    #   timeout: 30s
-    #   retries: 5
-    #   start_period: 30s
+    healthcheck:
+      test: ["CMD", "sh -c 'pg_isready -d ${POSTGRES_DB}'"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
     ports:
       - 5432:5432
 
@@ -47,30 +46,29 @@ services:
     volumes:
       - ./databases/redis/data:/redis/data
     restart: always
-        # healthcheck:
-    #   test: ["executable", "arg"]
-    #   interval: 1m30s
-    #   timeout: 30s
-    #   retries: 5
-    #   start_period: 30s
+    healthcheck:
+      test: ["CMD", "redis-cli ping | grep PONG"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
     ports:
       - 6379:6379
 
-  # scylladb:
-  #   container_name: scylladb
-  #   image: scylladb/scylla:latest
-  #   command: --seeds=scylladb --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
-  #   volumes:
-  #     - ./databases/scylladb/init/init.txt:/init.txt
-  #     - ./databases/scylladb/data:/var/lib/scylla
-  #   restart: always
-  #   healthcheck:
-  #     test: ["CMD", "nodetool", "status"]
-  #     interval: 10s
-  #     timeout: 10s
-  #     retries: 5
-  #   networks:
-  #     - web
+  scylladb:
+    container_name: scylladb
+    image: scylladb/scylla:latest
+    command: --seeds=scylladb --smp 1 --memory 750M --overprovisioned 1 --api-address 0.0.0.0
+    volumes:
+      - ./databases/scylladb/init/init.txt:/init.txt
+      - ./databases/scylladb/data:/var/lib/scylla
+    restart: always
+    healthcheck:
+      test: ["CMD", "nodetool", "status"]
+      interval: 1s
+      timeout: 3s
+      retries: 5
+    networks:
+      - web
 
 networks:
   web:
